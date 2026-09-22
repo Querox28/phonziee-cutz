@@ -322,6 +322,29 @@
     color:var(--gold-bright);
     text-decoration:none;
   }
+  /* ---------- código de acesso ---------- */
+  .pin-gate{
+    text-align:center;
+    padding:36px 6px 10px;
+  }
+  .pin-icon{font-size:32px;margin-bottom:12px;}
+  .pin-gate h2{font-size:18px;margin-bottom:6px;}
+  .pin-sub{color:var(--muted);font-size:13px;margin-bottom:22px;line-height:1.4;}
+  .pin-gate .field input{
+    text-align:center;
+    letter-spacing:0.4em;
+    font-size:20px;
+  }
+  .pin-error{
+    color:#E8938B;
+    font-size:12.5px;
+    margin:2px 0 16px;
+    min-height:1em;
+    opacity:0;
+    transition:opacity .15s;
+  }
+  .pin-error.show{opacity:1;}
+  .lock-btn{margin-top:22px;}
   /* ---------- ganhos ---------- */
   .earn-grid{
     display:grid;
@@ -389,7 +412,7 @@ const CONFIG = {
   instagramHandle: "@phonziiee_cutz",
   services: [
     { id: "corte",      name: "Corte Clássico",     duration: 50, price: "10€" },
-    { id: "corte",      name: "Corte Degradê",     duration: 50, price: "10€" },
+    { id: "corte_degrade", name: "Corte Degradê",   duration: 50, price: "10€" },
     { id: "corte_barba",name: "Corte + Barba",      duration: 75, price: "14€" },
     { id: "barba",      name: "Barba",              duration: 30, price: "5€"  },
   ],
@@ -406,9 +429,21 @@ const CONFIG = {
   },
   slotStepMinutes: 30,
   daysAhead: 14,
+  studioPin: "2846", // código de acesso ao Studio e aos Ganhos — muda aqui quando quiseres
 };
 
 const STORAGE_KEY = "phonziee_cutz_bookings_v1";
+const UNLOCK_KEY = "phonziee_cutz_unlocked_v1";
+
+function isUnlocked(){
+  try{ return localStorage.getItem(UNLOCK_KEY) === "1"; }
+  catch(e){ return state.unlockedFallback === true; }
+}
+function setUnlocked(v){
+  try{ localStorage.setItem(UNLOCK_KEY, v ? "1" : "0"); }
+  catch(e){ /* segue com o fallback em memória */ }
+  state.unlockedFallback = v;
+}
 
 /* ============================================================
    ESTADO
@@ -423,6 +458,7 @@ let state = {
   phone: "",
   notes: "",
   justConfirmed: null,
+  unlockedFallback: false,
 };
 
 function loadBookings(){
@@ -491,10 +527,15 @@ function render(){
     } else {
       app.appendChild(renderBookingFlow());
     }
+  } else if(!isUnlocked()){
+    app.appendChild(renderPinGate());
+    return;
   } else if(state.mode === "studio"){
     app.appendChild(renderStudio());
+    app.appendChild(renderLockButton());
   } else {
     app.appendChild(renderEarnings());
+    app.appendChild(renderLockButton());
   }
 
   const hintText = {
@@ -811,6 +852,65 @@ function googleCalendarLink(b){
     details: `Marcação em ${CONFIG.brandName} ${CONFIG.brandSuffix}. Cliente: ${b.name} · Tel: ${b.phone}${b.notes ? " · Notas: " + b.notes : ""}`,
   });
   return "https://calendar.google.com/calendar/render?" + params.toString();
+}
+
+function renderPinGate(){
+  const wrap = document.createElement("div");
+  wrap.className = "pin-gate";
+  wrap.innerHTML = `
+    <div class="pin-icon">🔒</div>
+    <h2>Acesso reservado</h2>
+    <div class="pin-sub">Esta zona é só para o barbeiro. Introduz o código de acesso.</div>
+  `;
+
+  const field = document.createElement("div");
+  field.className = "field";
+  field.innerHTML = `<label>Código</label>`;
+  const input = document.createElement("input");
+  input.type = "tel";
+  input.inputMode = "numeric";
+  input.maxLength = 8;
+  input.placeholder = "••••";
+  field.appendChild(input);
+  wrap.appendChild(field);
+
+  const err = document.createElement("div");
+  err.className = "pin-error";
+  err.textContent = "Código incorreto, tenta outra vez.";
+  wrap.appendChild(err);
+
+  const btn = document.createElement("button");
+  btn.className = "btn";
+  btn.textContent = "Entrar";
+  wrap.appendChild(btn);
+
+  function tryUnlock(){
+    if(input.value.trim() === CONFIG.studioPin){
+      setUnlocked(true);
+      render();
+    } else {
+      err.classList.add("show");
+      input.value = "";
+      input.focus();
+    }
+  }
+  btn.addEventListener("click", tryUnlock);
+  input.addEventListener("keydown", e=>{ if(e.key === "Enter") tryUnlock(); });
+  requestAnimationFrame(()=> input.focus());
+
+  return wrap;
+}
+
+function renderLockButton(){
+  const btn = document.createElement("button");
+  btn.className = "btn secondary lock-btn";
+  btn.textContent = "🔒 Bloquear este separador";
+  btn.addEventListener("click", ()=>{
+    setUnlocked(false);
+    state.mode = "cliente";
+    render();
+  });
+  return btn;
 }
 
 function renderConfirmation(b){
