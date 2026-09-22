@@ -203,6 +203,21 @@
   .time-slot.selected{border-color:var(--gold);background:var(--gold);color:#1B1611;font-weight:600;}
   .time-slot.taken{opacity:0.3;text-decoration:line-through;cursor:not-allowed;}
   .empty-note{color:var(--muted);font-size:13px;padding:8px 2px;}
+  /* toggle local do corte */
+  .loc-toggle{display:flex;gap:8px;}
+  .loc-opt{
+    flex:1;
+    padding:11px 6px;
+    text-align:center;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--cream);
+    font-size:13px;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .loc-opt.selected{border-color:var(--gold);background:var(--surface-2);color:var(--gold-bright);}
   /* form */
   .field{margin-bottom:12px;}
   .field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px;}
@@ -298,6 +313,11 @@
   .booking-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
   .booking-when{font-family:"Oswald",sans-serif;color:var(--gold-bright);font-size:14px;}
   .booking-svc{font-size:13px;color:var(--muted);}
+  .booking-home{
+    font-size:12.5px;
+    color:var(--gold-bright);
+    margin-bottom:6px;
+  }
   .booking-client{font-size:14.5px;margin-bottom:2px;}
   .booking-phone{font-size:13px;color:var(--muted);margin-bottom:10px;}
   .booking-actions{display:flex;gap:8px;}
@@ -420,11 +440,11 @@ const CONFIG = {
   // Cada janela é [minutoInicio, minutoFim] a partir da meia-noite.
   schedule: {
     0: [[16*60+30, 19*60]],                          // Domingo: 16h30–19h
-    1: [[9*60, 11*60], [16*60+30, 19*60]],         // Segunda: 9h–11h e 16h30–19h
-    2: [[9*60, 11*60], [16*60+30, 19*60]],         // Terça
-    3: [[9*60, 11*60], [16*60+30, 19*60]],         // Quarta
-    4: [[9*60, 11*60], [16*60+30, 19*60]],         // Quinta
-    5: [[9*60, 11*60], [16*60+30, 19*60]],         // Sexta
+    1: [[9*60, 11*60+30], [16*60+30, 19*60]],         // Segunda: 9h–11h30 e 16h30–19h
+    2: [[9*60, 11*60+30], [16*60+30, 19*60]],         // Terça
+    3: [[9*60, 11*60+30], [16*60+30, 19*60]],         // Quarta
+    4: [[9*60, 11*60+30], [16*60+30, 19*60]],         // Quinta
+    5: [[9*60, 11*60+30], [16*60+30, 19*60]],         // Sexta
     6: [[11*60+30, 18*60]],                           // Sábado: 11h30–18h
   },
   slotStepMinutes: 30,
@@ -457,6 +477,8 @@ let state = {
   name: "",
   phone: "",
   notes: "",
+  atHome: false,
+  address: "",
   justConfirmed: null,
   unlockedFallback: false,
 };
@@ -746,9 +768,45 @@ function renderBookingFlow(){
   const form = document.createElement("div");
   let confirmBtnRef = null;
 
+  function bookingValid(){
+    const nameOk = state.name.trim().length > 1;
+    const addressOk = !state.atHome || state.address.trim().length > 3;
+    return nameOk && addressOk;
+  }
+  function refreshConfirmState(){
+    if(confirmBtnRef) confirmBtnRef.disabled = !bookingValid();
+  }
+
+  // onde vai ser o corte
+  const locField = document.createElement("div");
+  locField.className = "field";
+  locField.innerHTML = `<label>Onde vai ser o corte?</label>`;
+  const locToggle = document.createElement("div");
+  locToggle.className = "loc-toggle";
+  locToggle.innerHTML = `
+    <button type="button" class="loc-opt ${!state.atHome?"selected":""}" data-home="0">Na barbearia</button>
+    <button type="button" class="loc-opt ${state.atHome?"selected":""}" data-home="1">Ao domicílio</button>
+  `;
+  locToggle.querySelectorAll(".loc-opt").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      state.atHome = b.dataset.home === "1";
+      render();
+      focusStep(4);
+    });
+  });
+  locField.appendChild(locToggle);
+  form.appendChild(locField);
+
+  if(state.atHome){
+    form.appendChild(fieldInput("Morada", "text", state.address, v=>{
+      state.address = v;
+      refreshConfirmState();
+    }, "Rua, número, localidade"));
+  }
+
   form.appendChild(fieldInput("Nome", "text", state.name, v=>{
     state.name = v;
-    if(confirmBtnRef) confirmBtnRef.disabled = state.name.trim().length <= 1;
+    refreshConfirmState();
   }, "O teu nome"));
   form.appendChild(fieldInput("Telemóvel (opcional)", "tel", state.phone, v=>state.phone=v, "9xx xxx xxx"));
 
@@ -768,14 +826,13 @@ function renderBookingFlow(){
   const dateObj = new Date(state.date+"T00:00:00");
   const summary = document.createElement("div");
   summary.className = "summary";
-  summary.innerHTML = `<b>${state.service.name}</b> · ${DOW[dateObj.getDay()]} ${dateObj.getDate()} ${MONTHS[dateObj.getMonth()]} · <b>${state.time}</b>`;
+  summary.innerHTML = `<b>${state.service.name}</b> · ${DOW[dateObj.getDay()]} ${dateObj.getDate()} ${MONTHS[dateObj.getMonth()]} · <b>${state.time}</b>${state.atHome ? " · <b>ao domicílio</b>" : ""}`;
   wrap.appendChild(summary);
 
-  const canConfirm = state.name.trim().length > 1;
   const confirmBtn = document.createElement("button");
   confirmBtn.className = "btn";
   confirmBtn.textContent = "Confirmar marcação";
-  confirmBtn.disabled = !canConfirm;
+  confirmBtn.disabled = !bookingValid();
   confirmBtn.addEventListener("click", confirmBooking);
   confirmBtnRef = confirmBtn;
   wrap.appendChild(confirmBtn);
@@ -826,6 +883,8 @@ function confirmBooking(){
     name: state.name.trim(),
     phone: state.phone.trim(),
     notes: state.notes.trim(),
+    atHome: state.atHome,
+    address: state.atHome ? state.address.trim() : "",
     status: "confirmado",
     createdAt: Date.now(),
   };
@@ -851,6 +910,7 @@ function googleCalendarLink(b){
     dates: calendarDates(b),
     details: `Marcação em ${CONFIG.brandName} ${CONFIG.brandSuffix}. Cliente: ${b.name} · Tel: ${b.phone}${b.notes ? " · Notas: " + b.notes : ""}`,
   });
+  if(b.atHome && b.address) params.set("location", b.address);
   return "https://calendar.google.com/calendar/render?" + params.toString();
 }
 
@@ -925,6 +985,8 @@ function renderConfirmation(b){
     <div class="confirm-row"><span>Serviço</span><span>${b.service}</span></div>
     <div class="confirm-row"><span>Dia</span><span>${DOW[dateObj.getDay()]}, ${dateObj.getDate()} ${MONTHS[dateObj.getMonth()]}</span></div>
     <div class="confirm-row"><span>Hora</span><span>${b.time}</span></div>
+    <div class="confirm-row"><span>Local</span><span>${b.atHome ? "Ao domicílio" : "Na barbearia"}</span></div>
+    ${b.atHome ? `<div class="confirm-row"><span>Morada</span><span>${b.address}</span></div>` : ""}
     <div class="confirm-row"><span>Duração</span><span>${b.duration} min</span></div>
     <div class="confirm-row"><span>Preço</span><span>${b.price}</span></div>
     ${b.phone ? `<div class="confirm-row"><span>Telemóvel</span><span>${b.phone}</span></div>` : ""}
@@ -948,7 +1010,7 @@ function renderConfirmation(b){
   again.style.marginTop = "14px";
   again.textContent = "Fazer outra marcação";
   again.addEventListener("click", ()=>{
-    state = {...state, step:1, service:null, date:null, time:null, name:"", phone:"", notes:"", justConfirmed:null};
+    state = {...state, step:1, service:null, date:null, time:null, name:"", phone:"", notes:"", atHome:false, address:"", justConfirmed:null};
     render();
   });
   wrap.appendChild(again);
@@ -987,6 +1049,7 @@ function renderStudio(){
         <span class="booking-when">${b.time}</span>
         <span class="booking-svc">${b.service}</span>
       </div>
+      ${b.atHome ? `<div class="booking-home">🏠 Ao domicílio · ${b.address}</div>` : ""}
       <div class="booking-client">${b.name}</div>
       <div class="booking-phone">${[b.phone, b.notes].filter(Boolean).join(" · ")}</div>
       <div class="booking-actions">
