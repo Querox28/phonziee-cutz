@@ -316,7 +316,23 @@
   .booking-home{
     font-size:12.5px;
     color:var(--gold-bright);
-    margin-bottom:6px;
+    margin-bottom:4px;
+  }
+  .booking-address{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:8px;
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:8px;
+    flex-wrap:wrap;
+  }
+  .maps-link{
+    color:var(--gold-bright);
+    text-decoration:none;
+    font-size:12px;
+    white-space:nowrap;
   }
   .booking-client{font-size:14.5px;margin-bottom:2px;}
   .booking-phone{font-size:13px;color:var(--muted);margin-bottom:10px;}
@@ -903,6 +919,9 @@ function calendarDates(b){
   const f = d => d.getFullYear()+pad2(d.getMonth()+1)+pad2(d.getDate())+"T"+pad2(d.getHours())+pad2(d.getMinutes())+"00";
   return f(start)+"/"+f(end);
 }
+function googleMapsDirectionsLink(address){
+  return "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(address);
+}
 function googleCalendarLink(b){
   const params = new URLSearchParams({
     action: "TEMPLATE",
@@ -993,6 +1012,20 @@ function renderConfirmation(b){
   `;
   wrap.appendChild(card);
 
+  if(b.atHome && b.address){
+    const maps = document.createElement("a");
+    maps.className = "btn secondary";
+    maps.style.marginTop = "14px";
+    maps.style.display = "block";
+    maps.style.textAlign = "center";
+    maps.style.textDecoration = "none";
+    maps.href = googleMapsDirectionsLink(b.address);
+    maps.target = "_blank";
+    maps.rel = "noopener";
+    maps.textContent = "Ver morada no Google Maps";
+    wrap.appendChild(maps);
+  }
+
   const cal = document.createElement("a");
   cal.className = "btn secondary";
   cal.style.marginTop = "14px";
@@ -1049,7 +1082,13 @@ function renderStudio(){
         <span class="booking-when">${b.time}</span>
         <span class="booking-svc">${b.service}</span>
       </div>
-      ${b.atHome ? `<div class="booking-home">🏠 Ao domicílio · ${b.address}</div>` : ""}
+      ${b.atHome ? `
+        <div class="booking-home">🏠 Ao domicílio</div>
+        <div class="booking-address">
+          <span>${b.address}</span>
+          <a class="maps-link" href="${googleMapsDirectionsLink(b.address)}" target="_blank" rel="noopener">Abrir no Maps →</a>
+        </div>
+      ` : ""}
       <div class="booking-client">${b.name}</div>
       <div class="booking-phone">${[b.phone, b.notes].filter(Boolean).join(" · ")}</div>
       <div class="booking-actions">
