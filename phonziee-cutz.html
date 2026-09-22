@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Phonziee Cutz — Marcações</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#15120F;
+    --surface:#1F1A16;
+    --surface-2:#2A231D;
+    --gold:#C9A15A;
+    --gold-bright:#E3C07E;
+    --red:#8C2F27;
+    --cream:#F3ECE1;
+    --muted:#9C9187;
+    --line:rgba(243,236,225,0.12);
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  *,*::before,*::after{box-sizing:inherit;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--cream);
+    font-family:"Work Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.45;
+  }
+  h1,h2,h3,.display{
+    font-family:"Oswald", "Arial Narrow", sans-serif;
+    font-weight:600;
+    letter-spacing:0.01em;
+    margin:0;
+  }
+  .wrap{
+    max-width:460px;
+    margin:0 auto;
+    min-height:100%;
+    padding:0 18px 48px;
+    position:relative;
+  }
+  /* ---------- header ---------- */
+  header{
+    padding:28px 0 16px;
+  }
+  .brandrow{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .wordmark{
+    font-size:28px;
+    line-height:1;
+    color:var(--cream);
+  }
+  .wordmark span{color:var(--gold);}
+  .tagline{
+    color:var(--muted);
+    font-size:13.5px;
+    margin-top:6px;
+  }
+  .ig-link{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    color:var(--gold-bright);
+    text-decoration:none;
+    font-size:12.5px;
+    border:1px solid var(--line);
+    padding:7px 10px;
+    border-radius:100px;
+    white-space:nowrap;
+    margin-top:2px;
+  }
+  .ig-link svg{width:14px;height:14px;flex:none;}
+  .pole{
+    height:5px;
+    margin:20px 0 22px;
+    background:repeating-linear-gradient(
+      -45deg,
+      var(--red) 0 10px,
+      var(--gold) 10px 20px,
+      var(--cream) 20px 22px,
+      var(--gold) 22px 32px,
+      var(--red) 32px 42px
+    );
+    border-radius:3px;
+    opacity:0.9;
+  }
+  /* ---------- mode tabs ---------- */
+  .tabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:26px;
+  }
+  .tab{
+    flex:1;
+    text-align:center;
+    padding:10px 0;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:transparent;
+    color:var(--muted);
+    font-family:"Oswald",sans-serif;
+    font-size:13px;
+    letter-spacing:0.04em;
+    cursor:pointer;
+  }
+  .tab.active{
+    background:var(--gold);
+    border-color:var(--gold);
+    color:#1B1611;
+  }
+  /* ---------- step blocks ---------- */
+  .step{
+    margin-bottom:26px;
+  }
+  .step-title{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    margin-bottom:12px;
+  }
+  .step-num{
+    font-family:"Oswald",sans-serif;
+    color:var(--gold);
+    font-size:13px;
+  }
+  .step-title h2{
+    font-size:16px;
+    color:var(--cream);
+  }
+  /* service cards */
+  .svc-list{display:flex;flex-direction:column;gap:8px;}
+  .svc{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:13px 14px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    cursor:pointer;
+  }
+  .svc.selected{border-color:var(--gold);background:var(--surface-2);}
+  .svc-name{font-size:14.5px;color:var(--cream);}
+  .svc-meta{font-size:12px;color:var(--muted);margin-top:2px;}
+  .svc-price{
+    font-family:"Oswald",sans-serif;
+    color:var(--gold-bright);
+    font-size:15px;
+    white-space:nowrap;
+  }
+  /* day chips */
+  .day-scroll{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding-bottom:4px;
+    margin:0 -18px;
+    padding-left:18px;
+    padding-right:18px;
+  }
+  .day-chip{
+    flex:none;
+    width:58px;
+    padding:10px 0;
+    text-align:center;
+    border-radius:12px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    cursor:pointer;
+  }
+  .day-chip .dow{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;}
+  .day-chip .num{display:block;font-family:"Oswald",sans-serif;font-size:18px;color:var(--cream);margin-top:2px;}
+  .day-chip.selected{border-color:var(--gold);background:var(--surface-2);}
+  .day-chip.selected .num{color:var(--gold-bright);}
+  /* time grid */
+  .time-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+  }
+  .time-slot{
+    padding:10px 0;
+    text-align:center;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--cream);
+    font-size:13.5px;
+    cursor:pointer;
+  }
+  .time-slot.selected{border-color:var(--gold);background:var(--gold);color:#1B1611;font-weight:600;}
+  .time-slot.taken{opacity:0.3;text-decoration:line-through;cursor:not-allowed;}
+  .empty-note{color:var(--muted);font-size:13px;padding:8px 2px;}
+  /* form */
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px;}
+  .field input,.field textarea{
+    width:100%;
+    padding:12px 13px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    color:var(--cream);
+    font-family:inherit;
+    font-size:14.5px;
+  }
+  .field input:focus,.field textarea:focus{outline:2px solid var(--gold);outline-offset:1px;}
+  .field textarea{resize:vertical;min-height:60px;}
+  /* buttons */
+  .btn{
+    width:100%;
+    padding:15px 0;
+    border-radius:12px;
+    border:none;
+    background:var(--gold);
+    color:#1B1611;
+    font-family:"Oswald",sans-serif;
+    font-size:15px;
+    letter-spacing:0.03em;
+    cursor:pointer;
+  }
+  .btn:disabled{opacity:0.35;cursor:not-allowed;}
+  .btn.secondary{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--cream);
+  }
+  .btn.danger{
+    background:transparent;
+    border:1px solid var(--red);
+    color:#E8938B;
+  }
+  /* summary line before confirm */
+  .summary{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px;
+    margin-bottom:16px;
+    font-size:13.5px;
+    color:var(--muted);
+  }
+  .summary b{color:var(--cream);font-weight:500;}
+  /* confirmation screen */
+  .confirm-card{
+    background:var(--surface);
+    border:1px solid var(--gold);
+    border-radius:16px;
+    padding:22px;
+    text-align:left;
+  }
+  .confirm-check{
+    width:44px;height:44px;border-radius:50%;
+    background:var(--gold);color:#1B1611;
+    display:flex;align-items:center;justify-content:center;
+    font-size:22px;margin-bottom:14px;
+  }
+  .confirm-card h2{font-size:19px;margin-bottom:4px;}
+  .confirm-card .sub{color:var(--muted);font-size:13px;margin-bottom:16px;}
+  .confirm-row{
+    display:flex;justify-content:space-between;
+    padding:9px 0;border-top:1px solid var(--line);
+    font-size:13.5px;
+  }
+  .confirm-row:first-of-type{border-top:none;}
+  .confirm-row span:first-child{color:var(--muted);}
+  .confirm-row span:last-child{color:var(--cream);text-align:right;}
+  /* studio (barber) mode */
+  .studio-empty{
+    color:var(--muted);
+    font-size:14px;
+    text-align:center;
+    padding:60px 10px;
+    border:1px dashed var(--line);
+    border-radius:14px;
+  }
+  .booking-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-left:3px solid var(--gold);
+    border-radius:12px;
+    padding:14px;
+    margin-bottom:10px;
+  }
+  .booking-card.done{border-left-color:var(--muted);opacity:0.55;}
+  .booking-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+  .booking-when{font-family:"Oswald",sans-serif;color:var(--gold-bright);font-size:14px;}
+  .booking-svc{font-size:13px;color:var(--muted);}
+  .booking-client{font-size:14.5px;margin-bottom:2px;}
+  .booking-phone{font-size:13px;color:var(--muted);margin-bottom:10px;}
+  .booking-actions{display:flex;gap:8px;}
+  .booking-actions button{
+    flex:1;
+    padding:8px 0;
+    border-radius:8px;
+    font-size:12.5px;
+    border:1px solid var(--line);
+    background:transparent;
+    color:var(--cream);
+    cursor:pointer;
+  }
+  .cal-link{
+    display:block;
+    text-align:center;
+    margin-top:8px;
+    padding:8px 0;
+    border-radius:8px;
+    font-size:12.5px;
+    border:1px solid var(--line);
+    color:var(--gold-bright);
+    text-decoration:none;
+  }
+  /* ---------- ganhos ---------- */
+  .earn-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:8px;
+  }
+  .earn-card{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    padding:16px 14px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+  }
+  .earn-card.highlight{
+    background:var(--surface-2);
+    border-color:var(--gold);
+  }
+  .earn-label{font-size:12px;color:var(--muted);}
+  .earn-value{font-family:"Oswald",sans-serif;font-size:22px;color:var(--gold-bright);}
+  .earn-card.highlight .earn-value{color:var(--gold);}
+  .svc-earn-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:12px 14px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    margin-bottom:8px;
+  }
+  .day-group-label{
+    font-family:"Oswald",sans-serif;
+    color:var(--muted);
+    font-size:12.5px;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    margin:20px 0 8px;
+  }
+  .day-group-label:first-child{margin-top:0;}
+  .studio-footer{margin-top:24px;}
+  .hint{
+    font-size:11.5px;
+    color:var(--muted);
+    text-align:center;
+    margin-top:18px;
+  }
+  ::-webkit-scrollbar{height:0;width:0;}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+/* ============================================================
+   CONFIGURAÇÃO — o barbeiro pode editar isto livremente
+   ============================================================ */
+const CONFIG = {
+  brandName: "Phonziee",
+  brandSuffix: "Cutz",
+  instagram: "https://www.instagram.com/phonziiee_cutz/",
+  instagramHandle: "@phonziiee_cutz",
+  services: [
+    { id: "corte",      name: "Corte clássico",     duration: 50, price: "10€" },
+    { id: "corte_barba",name: "Corte + Barba",      duration: 75, price: "14€" },
+    { id: "barba",      name: "Barba",              duration: 30, price: "5€"  },
+  ],
+  // Horário por dia da semana (0=Domingo ... 6=Sábado).
+  // Cada janela é [minutoInicio, minutoFim] a partir da meia-noite.
+  schedule: {
+    0: [[16*60+30, 19*60]],                          // Domingo: 16h30–19h
+    1: [[9*60, 11*60+30], [16*60+30, 19*60]],         // Segunda: 9h–11h30 e 16h30–19h
+    2: [[9*60, 11*60+30], [16*60+30, 19*60]],         // Terça
+    3: [[9*60, 11*60+30], [16*60+30, 19*60]],         // Quarta
+    4: [[9*60, 11*60+30], [16*60+30, 19*60]],         // Quinta
+    5: [[9*60, 11*60+30], [16*60+30, 19*60]],         // Sexta
+    6: [[11*60+30, 18*60]],                           // Sábado: 11h30–18h
+  },
+  slotStepMinutes: 30,
+  daysAhead: 14,
+};
+
+const STORAGE_KEY = "phonziee_cutz_bookings_v1";
+
+/* ============================================================
+   ESTADO
+   ============================================================ */
+let state = {
+  mode: "cliente", // "cliente" | "studio"
+  step: 1,
+  service: null,
+  date: null,
+  time: null,
+  name: "",
+  phone: "",
+  notes: "",
+  justConfirmed: null,
+};
+
+function loadBookings(){
+  try{
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  }catch(e){ return []; }
+}
+function saveBookings(list){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }
+  catch(e){ /* localStorage indisponível — a app continua a funcionar nesta sessão */ }
+}
+
+/* ============================================================
+   HELPERS DE DATA
+   ============================================================ */
+const DOW = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+const MONTHS = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+
+function fmtISO(d){
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function upcomingDays(){
+  const out = [];
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  for(let i=0; i < CONFIG.daysAhead; i++){
+    const d = new Date(today);
+    d.setDate(d.getDate()+i);
+    out.push(d);
+  }
+  return out;
+}
+function timeSlotsFor(dateISO){
+  const d = new Date(dateISO+"T00:00:00");
+  const windows = CONFIG.schedule[d.getDay()] || [];
+  const step = CONFIG.slotStepMinutes;
+  const slots = [];
+  windows.forEach(([startMin, endMin])=>{
+    for(let t = startMin; t < endMin; t += step){
+      const h = Math.floor(t/60), m = t%60;
+      slots.push(String(h).padStart(2,"0")+":"+String(m).padStart(2,"0"));
+    }
+  });
+  return slots;
+}
+function isSlotTaken(dateISO, time){
+  return loadBookings().some(b => b.date === dateISO && b.time === time && b.status !== "cancelado");
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+const app = document.getElementById("app");
+
+function render(){
+  app.innerHTML = "";
+  app.appendChild(renderHeader());
+  const pole = document.createElement("div");
+  pole.className = "pole";
+  app.appendChild(pole);
+  app.appendChild(renderTabs());
+
+  if(state.mode === "cliente"){
+    if(state.justConfirmed){
+      app.appendChild(renderConfirmation(state.justConfirmed));
+    } else {
+      app.appendChild(renderBookingFlow());
+    }
+  } else if(state.mode === "studio"){
+    app.appendChild(renderStudio());
+  } else {
+    app.appendChild(renderEarnings());
+  }
+
+  const hintText = {
+    cliente: "Versão de teste — as marcações ficam guardadas apenas neste dispositivo.",
+    studio: "Modo Studio: aqui vês as marcações feitas neste dispositivo, para testares o fluxo.",
+    ganhos: "Contas feitas com base nas marcações confirmadas ou concluídas guardadas neste dispositivo.",
+  };
+  const hint = document.createElement("div");
+  hint.className = "hint";
+  hint.textContent = hintText[state.mode];
+  app.appendChild(hint);
+}
+
+function parsePrice(str){
+  const n = parseFloat(String(str).replace(",",".").replace(/[^0-9.]/g,""));
+  return isNaN(n) ? 0 : n;
+}
+function fmtEUR(n){
+  return n.toLocaleString("pt-PT", {minimumFractionDigits: n % 1 === 0 ? 0 : 2, maximumFractionDigits: 2}) + "€";
+}
+function startOfWeek(d){
+  const x = new Date(d);
+  const day = (x.getDay() + 6) % 7; // Segunda = 0
+  x.setDate(x.getDate() - day);
+  x.setHours(0,0,0,0);
+  return x;
+}
+function renderEarnings(){
+  const wrap = document.createElement("div");
+  const all = loadBookings().filter(b => b.status !== "cancelado");
+
+  if(all.length === 0){
+    const empty = document.createElement("div");
+    empty.className = "studio-empty";
+    empty.textContent = "Ainda sem marcações contabilizadas. Os ganhos aparecem aqui assim que houver marcações confirmadas.";
+    wrap.appendChild(empty);
+    return wrap;
+  }
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayISO = fmtISO(today);
+  const weekStartISO = fmtISO(startOfWeek(today));
+  const monthPrefix = todayISO.slice(0,7); // YYYY-MM
+
+  let totalHoje = 0, totalSemana = 0, totalMes = 0, totalGeral = 0;
+  const porServico = {};
+
+  all.forEach(b=>{
+    const valor = parsePrice(b.price);
+    totalGeral += valor;
+    if(b.date === todayISO) totalHoje += valor;
+    if(b.date >= weekStartISO) totalSemana += valor;
+    if(b.date.slice(0,7) === monthPrefix) totalMes += valor;
+    if(!porServico[b.service]) porServico[b.service] = {count:0, total:0};
+    porServico[b.service].count += 1;
+    porServico[b.service].total += valor;
+  });
+
+  const cards = document.createElement("div");
+  cards.className = "earn-grid";
+  cards.innerHTML = `
+    <div class="earn-card"><span class="earn-label">Hoje</span><span class="earn-value">${fmtEUR(totalHoje)}</span></div>
+    <div class="earn-card"><span class="earn-label">Esta semana</span><span class="earn-value">${fmtEUR(totalSemana)}</span></div>
+    <div class="earn-card"><span class="earn-label">Este mês</span><span class="earn-value">${fmtEUR(totalMes)}</span></div>
+    <div class="earn-card highlight"><span class="earn-label">Total</span><span class="earn-value">${fmtEUR(totalGeral)}</span></div>
+  `;
+  wrap.appendChild(cards);
+
+  const label = document.createElement("div");
+  label.className = "day-group-label";
+  label.textContent = "Por serviço";
+  wrap.appendChild(label);
+
+  Object.entries(porServico)
+    .sort((a,b)=> b[1].total - a[1].total)
+    .forEach(([name, info])=>{
+      const row = document.createElement("div");
+      row.className = "svc-earn-row";
+      row.innerHTML = `
+        <div>
+          <div class="svc-name">${name}</div>
+          <div class="svc-meta">${info.count} marcaç${info.count===1?"ão":"ões"}</div>
+        </div>
+        <div class="svc-price">${fmtEUR(info.total)}</div>
+      `;
+      wrap.appendChild(row);
+    });
+
+  return wrap;
+}
+
+function renderHeader(){
+  const header = document.createElement("header");
+  header.innerHTML = `
+    <div class="brandrow">
+      <div>
+        <h1 class="wordmark">${CONFIG.brandName} <span>${CONFIG.brandSuffix}</span></h1>
+        <div class="tagline">Marca o teu corte em menos de um minuto</div>
+      </div>
+      <a class="ig-link" href="${CONFIG.instagram}" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1"/></svg>
+        ${CONFIG.instagramHandle}
+      </a>
+    </div>
+  `;
+  return header;
+}
+
+function renderTabs(){
+  const tabs = document.createElement("div");
+  tabs.className = "tabs";
+  tabs.innerHTML = `
+    <button class="tab ${state.mode==="cliente"?"active":""}" data-mode="cliente">Cliente</button>
+    <button class="tab ${state.mode==="studio"?"active":""}" data-mode="studio">Studio</button>
+    <button class="tab ${state.mode==="ganhos"?"active":""}" data-mode="ganhos">Ganhos</button>
+  `;
+  tabs.querySelectorAll(".tab").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      state.mode = btn.dataset.mode;
+      state.justConfirmed = null;
+      render();
+    });
+  });
+  return tabs;
+}
+
+function renderBookingFlow(){
+  const wrap = document.createElement("div");
+
+  // Passo 1 — serviço
+  wrap.appendChild(stepTitle(1, "Escolhe o serviço"));
+  const svcList = document.createElement("div");
+  svcList.className = "svc-list";
+  CONFIG.services.forEach(s=>{
+    const el = document.createElement("div");
+    el.className = "svc" + (state.service && state.service.id===s.id ? " selected":"");
+    el.innerHTML = `
+      <div>
+        <div class="svc-name">${s.name}</div>
+        <div class="svc-meta">${s.duration} min</div>
+      </div>
+      <div class="svc-price">${s.price}</div>
+    `;
+    el.addEventListener("click", ()=>{
+      state.service = s;
+      render();
+      focusStep(2);
+    });
+    svcList.appendChild(el);
+  });
+  wrap.appendChild(svcList);
+
+  if(!state.service) return wrap;
+
+  // Passo 2 — dia
+  wrap.appendChild(stepTitle(2, "Escolhe o dia", "step2"));
+  const dayScroll = document.createElement("div");
+  dayScroll.className = "day-scroll";
+  upcomingDays().forEach(d=>{
+    const iso = fmtISO(d);
+    const chip = document.createElement("div");
+    chip.className = "day-chip" + (state.date===iso ? " selected":"");
+    chip.innerHTML = `<span class="dow">${DOW[d.getDay()]}</span><span class="num">${d.getDate()}</span>`;
+    chip.addEventListener("click", ()=>{
+      state.date = iso;
+      state.time = null;
+      render();
+      focusStep(3);
+    });
+    dayScroll.appendChild(chip);
+  });
+  wrap.appendChild(dayScroll);
+
+  if(!state.date) return wrap;
+
+  // Passo 3 — hora
+  wrap.appendChild(stepTitle(3, "Escolhe a hora", "step3"));
+  const slots = timeSlotsFor(state.date);
+  if(slots.length === 0){
+    const p = document.createElement("div");
+    p.className = "empty-note";
+    p.textContent = "Sem horários disponíveis neste dia.";
+    wrap.appendChild(p);
+  } else {
+    const grid = document.createElement("div");
+    grid.className = "time-grid";
+    slots.forEach(t=>{
+      const taken = isSlotTaken(state.date, t);
+      const el = document.createElement("div");
+      el.className = "time-slot" + (state.time===t?" selected":"") + (taken?" taken":"");
+      el.textContent = t;
+      if(!taken){
+        el.addEventListener("click", ()=>{
+          state.time = t;
+          render();
+          focusStep(4);
+        });
+      }
+      grid.appendChild(el);
+    });
+    wrap.appendChild(grid);
+  }
+
+  if(!state.time) return wrap;
+
+  // Passo 4 — dados do cliente
+  wrap.appendChild(stepTitle(4, "Os teus dados", "step4"));
+  const form = document.createElement("div");
+  let confirmBtnRef = null;
+
+  form.appendChild(fieldInput("Nome", "text", state.name, v=>{
+    state.name = v;
+    if(confirmBtnRef) confirmBtnRef.disabled = state.name.trim().length <= 1;
+  }, "O teu nome"));
+  form.appendChild(fieldInput("Telemóvel (opcional)", "tel", state.phone, v=>state.phone=v, "9xx xxx xxx"));
+
+  const notesField = document.createElement("div");
+  notesField.className = "field";
+  notesField.innerHTML = `<label>Notas (opcional)</label>`;
+  const ta = document.createElement("textarea");
+  ta.placeholder = "Alguma preferência para o corte?";
+  ta.value = state.notes;
+  ta.addEventListener("input", ()=> state.notes = ta.value);
+  notesField.appendChild(ta);
+  form.appendChild(notesField);
+
+  wrap.appendChild(form);
+
+  // resumo
+  const dateObj = new Date(state.date+"T00:00:00");
+  const summary = document.createElement("div");
+  summary.className = "summary";
+  summary.innerHTML = `<b>${state.service.name}</b> · ${DOW[dateObj.getDay()]} ${dateObj.getDate()} ${MONTHS[dateObj.getMonth()]} · <b>${state.time}</b>`;
+  wrap.appendChild(summary);
+
+  const canConfirm = state.name.trim().length > 1;
+  const confirmBtn = document.createElement("button");
+  confirmBtn.className = "btn";
+  confirmBtn.textContent = "Confirmar marcação";
+  confirmBtn.disabled = !canConfirm;
+  confirmBtn.addEventListener("click", confirmBooking);
+  confirmBtnRef = confirmBtn;
+  wrap.appendChild(confirmBtn);
+
+  return wrap;
+}
+
+function stepTitle(n, text, id){
+  const div = document.createElement("div");
+  div.className = "step-title";
+  if(id) div.id = id;
+  div.innerHTML = `<span class="step-num">${n}</span><h2>${text}</h2>`;
+  const holder = document.createElement("div");
+  holder.className = "step";
+  if(id) holder.id = id;
+  holder.appendChild(div);
+  return holder;
+}
+function focusStep(n){
+  // pequeno scroll para o próximo passo, feito após o próximo paint
+  requestAnimationFrame(()=>{
+    const el = document.getElementById("step"+n);
+    if(el) el.scrollIntoView({behavior:"smooth", block:"start"});
+  });
+}
+function fieldInput(label, type, value, onInput, placeholder){
+  const wrap = document.createElement("div");
+  wrap.className = "field";
+  wrap.innerHTML = `<label>${label}</label>`;
+  const input = document.createElement("input");
+  input.type = type;
+  input.value = value;
+  input.placeholder = placeholder || "";
+  input.addEventListener("input", ()=> onInput(input.value));
+  wrap.appendChild(input);
+  return wrap;
+}
+
+function confirmBooking(){
+  const bookings = loadBookings();
+  const booking = {
+    id: "b_" + Date.now(),
+    service: state.service.name,
+    price: state.service.price,
+    duration: state.service.duration,
+    date: state.date,
+    time: state.time,
+    name: state.name.trim(),
+    phone: state.phone.trim(),
+    notes: state.notes.trim(),
+    status: "confirmado",
+    createdAt: Date.now(),
+  };
+  bookings.push(booking);
+  saveBookings(bookings);
+  state.justConfirmed = booking;
+  render();
+}
+
+function pad2(n){ return String(n).padStart(2,"0"); }
+function calendarDates(b){
+  const [h,m] = b.time.split(":").map(Number);
+  const start = new Date(b.date+"T00:00:00");
+  start.setHours(h,m,0,0);
+  const end = new Date(start.getTime() + b.duration*60000);
+  const f = d => d.getFullYear()+pad2(d.getMonth()+1)+pad2(d.getDate())+"T"+pad2(d.getHours())+pad2(d.getMinutes())+"00";
+  return f(start)+"/"+f(end);
+}
+function googleCalendarLink(b){
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: `${CONFIG.brandName} ${CONFIG.brandSuffix} — ${b.service}`,
+    dates: calendarDates(b),
+    details: `Marcação em ${CONFIG.brandName} ${CONFIG.brandSuffix}. Cliente: ${b.name} · Tel: ${b.phone}${b.notes ? " · Notas: " + b.notes : ""}`,
+  });
+  return "https://calendar.google.com/calendar/render?" + params.toString();
+}
+
+function renderConfirmation(b){
+  const wrap = document.createElement("div");
+  const dateObj = new Date(b.date+"T00:00:00");
+  const card = document.createElement("div");
+  card.className = "confirm-card";
+  card.innerHTML = `
+    <div class="confirm-check">✓</div>
+    <h2>Marcação confirmada</h2>
+    <div class="sub">Até já, ${b.name.split(" ")[0]}.</div>
+    <div class="confirm-row"><span>Serviço</span><span>${b.service}</span></div>
+    <div class="confirm-row"><span>Dia</span><span>${DOW[dateObj.getDay()]}, ${dateObj.getDate()} ${MONTHS[dateObj.getMonth()]}</span></div>
+    <div class="confirm-row"><span>Hora</span><span>${b.time}</span></div>
+    <div class="confirm-row"><span>Duração</span><span>${b.duration} min</span></div>
+    <div class="confirm-row"><span>Preço</span><span>${b.price}</span></div>
+    ${b.phone ? `<div class="confirm-row"><span>Telemóvel</span><span>${b.phone}</span></div>` : ""}
+  `;
+  wrap.appendChild(card);
+
+  const cal = document.createElement("a");
+  cal.className = "btn secondary";
+  cal.style.marginTop = "14px";
+  cal.style.display = "block";
+  cal.style.textAlign = "center";
+  cal.style.textDecoration = "none";
+  cal.href = googleCalendarLink(b);
+  cal.target = "_blank";
+  cal.rel = "noopener";
+  cal.textContent = "Adicionar lembrete à agenda";
+  wrap.appendChild(cal);
+
+  const again = document.createElement("button");
+  again.className = "btn secondary";
+  again.style.marginTop = "14px";
+  again.textContent = "Fazer outra marcação";
+  again.addEventListener("click", ()=>{
+    state = {...state, step:1, service:null, date:null, time:null, name:"", phone:"", notes:"", justConfirmed:null};
+    render();
+  });
+  wrap.appendChild(again);
+
+  return wrap;
+}
+
+function renderStudio(){
+  const wrap = document.createElement("div");
+  const bookings = loadBookings()
+    .filter(b=>b.status!=="cancelado")
+    .sort((a,b)=> (a.date+a.time).localeCompare(b.date+b.time));
+
+  if(bookings.length === 0){
+    const empty = document.createElement("div");
+    empty.className = "studio-empty";
+    empty.textContent = "Ainda sem marcações. Faz um teste no separador Cliente.";
+    wrap.appendChild(empty);
+    return wrap;
+  }
+
+  let lastDate = null;
+  bookings.forEach(b=>{
+    if(b.date !== lastDate){
+      lastDate = b.date;
+      const dateObj = new Date(b.date+"T00:00:00");
+      const label = document.createElement("div");
+      label.className = "day-group-label";
+      label.textContent = `${DOW[dateObj.getDay()]}, ${dateObj.getDate()} ${MONTHS[dateObj.getMonth()]}`;
+      wrap.appendChild(label);
+    }
+    const card = document.createElement("div");
+    card.className = "booking-card" + (b.status==="concluído" ? " done" : "");
+    card.innerHTML = `
+      <div class="booking-top">
+        <span class="booking-when">${b.time}</span>
+        <span class="booking-svc">${b.service}</span>
+      </div>
+      <div class="booking-client">${b.name}</div>
+      <div class="booking-phone">${[b.phone, b.notes].filter(Boolean).join(" · ")}</div>
+      <div class="booking-actions">
+        <button data-action="done">${b.status==="concluído" ? "Reabrir" : "Concluído"}</button>
+        <button data-action="cancel">Cancelar</button>
+      </div>
+      <a class="cal-link" href="${googleCalendarLink(b)}" target="_blank" rel="noopener">+ agenda</a>
+    `;
+    card.querySelector('[data-action="done"]').addEventListener("click", ()=>{
+      toggleDone(b.id);
+    });
+    card.querySelector('[data-action="cancel"]').addEventListener("click", ()=>{
+      cancelBooking(b.id);
+    });
+    wrap.appendChild(card);
+  });
+
+  const footer = document.createElement("div");
+  footer.className = "studio-footer";
+  const resetBtn = document.createElement("button");
+  resetBtn.className = "btn danger";
+  resetBtn.textContent = "Limpar todas as marcações de teste";
+  resetBtn.addEventListener("click", ()=>{
+    if(confirm("Apagar todas as marcações guardadas neste dispositivo?")){
+      saveBookings([]);
+      render();
+    }
+  });
+  footer.appendChild(resetBtn);
+  wrap.appendChild(footer);
+
+  return wrap;
+}
+
+function toggleDone(id){
+  const bookings = loadBookings();
+  const b = bookings.find(x=>x.id===id);
+  if(b) b.status = b.status === "concluído" ? "confirmado" : "concluído";
+  saveBookings(bookings);
+  render();
+}
+function cancelBooking(id){
+  const bookings = loadBookings();
+  const b = bookings.find(x=>x.id===id);
+  if(b) b.status = "cancelado";
+  saveBookings(bookings);
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
