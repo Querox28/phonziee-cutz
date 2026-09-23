@@ -219,12 +219,22 @@
   }
   .loc-opt.selected{border-color:var(--gold);background:var(--surface-2);color:var(--gold-bright);}
   .geo-box{margin:-4px 0 12px;}
-  .geo-btn{padding:12px 0;font-size:13px;}
+  .geo-label{font-size:12.5px;color:var(--muted);margin-bottom:6px;}
+  .geo-btn{padding:12px 0;font-size:13px;margin-bottom:8px;}
+  .geo-divider{
+    text-align:center;
+    color:var(--muted);
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    margin:6px 0;
+  }
   .geo-status{
     font-size:11.5px;
     color:var(--muted);
     line-height:1.4;
-    margin-top:8px;
+    margin-top:2px;
+    margin-bottom:8px;
     padding:0 2px;
   }
   .geo-status a{color:var(--gold-bright);}
@@ -847,32 +857,71 @@ function renderBookingFlow(){
       refreshConfirmState();
     }, "Rua, número, localidade"));
 
-    // localização exata por GPS (opcional, mais preciso do que a morada escrita)
+    // localização exata (opcional, mais preciso do que a morada escrita)
     const geoWrap = document.createElement("div");
     geoWrap.className = "geo-box";
+    const geoLabel = document.createElement("div");
+    geoLabel.className = "geo-label";
+    geoLabel.textContent = "Localização exata (opcional)";
+    geoWrap.appendChild(geoLabel);
+
     const geoBtn = document.createElement("button");
     geoBtn.type = "button";
     geoBtn.className = "btn secondary geo-btn";
+
+    const geoDivider = document.createElement("div");
+    geoDivider.className = "geo-divider";
+    geoDivider.textContent = "ou escolhe o pin à mão";
+
+    const mapsOpen = document.createElement("a");
+    mapsOpen.className = "btn secondary geo-btn";
+    mapsOpen.style.textDecoration = "none";
+    mapsOpen.style.display = "block";
+    mapsOpen.style.textAlign = "center";
+    mapsOpen.href = "https://www.google.com/maps";
+    mapsOpen.target = "_blank";
+    mapsOpen.rel = "noopener";
+    mapsOpen.textContent = "🗺️ Abrir o Google Maps";
+
+    const mapsHelp = document.createElement("div");
+    mapsHelp.className = "geo-status";
+    mapsHelp.innerHTML = "No Maps, mantém o dedo no sítio exato até aparecer o pin — em baixo mostra as coordenadas, toca para copiar. Depois cola aqui:";
+
+    const pasteField = document.createElement("div");
+    pasteField.className = "field";
+    const pasteInput = document.createElement("input");
+    pasteInput.type = "text";
+    pasteInput.placeholder = "Cola aqui as coordenadas (ex: 38.7121, -9.1391)";
+    pasteField.appendChild(pasteInput);
+
+    const pasteBtn = document.createElement("button");
+    pasteBtn.type = "button";
+    pasteBtn.className = "btn secondary geo-btn";
+    pasteBtn.textContent = "Usar este pin";
+
     const geoStatus = document.createElement("div");
     geoStatus.className = "geo-status";
 
     function renderGeoState(){
-      if(state.lat != null && state.lng != null){
-        geoBtn.textContent = "📍 Localização exata capturada ✓";
-        geoBtn.disabled = true;
-        geoStatus.innerHTML = `O pin no Maps vai cair exatamente onde estavas ao marcar. <a href="#" class="geo-remove">Remover</a>`;
+      const has = state.lat != null && state.lng != null;
+      geoBtn.textContent = has ? "📍 Localização exata capturada ✓" : "📍 Usar a minha localização atual";
+      geoBtn.disabled = has;
+      mapsOpen.style.display = has ? "none" : "block";
+      geoDivider.style.display = has ? "none" : "block";
+      mapsHelp.style.display = has ? "none" : "block";
+      pasteField.style.display = has ? "none" : "block";
+      pasteBtn.style.display = has ? "none" : "block";
+      if(has){
+        geoStatus.innerHTML = `O pin no Maps vai cair exatamente neste ponto. <a href="#" class="geo-remove">Remover</a>`;
         const rm = geoStatus.querySelector(".geo-remove");
         rm.addEventListener("click", (e)=>{
           e.preventDefault();
           state.lat = null;
           state.lng = null;
-          geoBtn.disabled = false;
           renderGeoState();
           refreshConfirmState();
         });
       } else {
-        geoBtn.textContent = "📍 Usar a minha localização atual";
-        geoBtn.disabled = false;
         geoStatus.textContent = "";
       }
     }
@@ -880,12 +929,11 @@ function renderBookingFlow(){
 
     geoBtn.addEventListener("click", ()=>{
       if(!navigator.geolocation){
-        geoStatus.textContent = "Este telemóvel/navegador não permite partilhar localização — escreve a morada acima.";
+        geoStatus.textContent = "Este telemóvel/navegador não permite partilhar localização — usa o Maps abaixo ou escreve a morada acima.";
         return;
       }
       geoBtn.disabled = true;
       geoBtn.textContent = "A localizar…";
-      geoStatus.textContent = "";
       navigator.geolocation.getCurrentPosition(
         (pos)=>{
           state.lat = pos.coords.latitude;
@@ -896,13 +944,30 @@ function renderBookingFlow(){
         ()=>{
           geoBtn.disabled = false;
           geoBtn.textContent = "📍 Usar a minha localização atual";
-          geoStatus.textContent = "Não foi possível obter a localização (permissão negada ou indisponível). Escreve a morada acima.";
+          geoStatus.textContent = "Não foi possível obter a localização (permissão negada ou indisponível). Usa o Maps abaixo ou escreve a morada acima.";
         },
         { enableHighAccuracy: true, timeout: 10000 }
       );
     });
 
+    pasteBtn.addEventListener("click", ()=>{
+      const match = pasteInput.value.match(/(-?\d{1,3}\.\d+)[,\s]+(-?\d{1,3}\.\d+)/);
+      if(!match){
+        geoStatus.textContent = "Não encontrei coordenadas nesse texto. Copia diretamente os números que o Maps mostra (ex: 38.7121, -9.1391).";
+        return;
+      }
+      state.lat = parseFloat(match[1]);
+      state.lng = parseFloat(match[2]);
+      renderGeoState();
+      refreshConfirmState();
+    });
+
     geoWrap.appendChild(geoBtn);
+    geoWrap.appendChild(geoDivider);
+    geoWrap.appendChild(mapsOpen);
+    geoWrap.appendChild(mapsHelp);
+    geoWrap.appendChild(pasteField);
+    geoWrap.appendChild(pasteBtn);
     geoWrap.appendChild(geoStatus);
     form.appendChild(geoWrap);
   }
