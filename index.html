@@ -542,8 +542,22 @@ function timeSlotsFor(dateISO){
   });
   return slots;
 }
-function isSlotTaken(dateISO, time){
-  return loadBookings().some(b => b.date === dateISO && b.time === time && b.status !== "cancelado");
+function bookedIntervals(dateISO){
+  return loadBookings()
+    .filter(b => b.date === dateISO && b.status !== "cancelado")
+    .map(b => {
+      const [h, m] = b.time.split(":").map(Number);
+      const start = h * 60 + m;
+      return [start, start + (b.duration || 30)];
+    });
+}
+function isSlotTaken(dateISO, time, duration){
+  const [h, m] = time.split(":").map(Number);
+  const start = h * 60 + m;
+  const end = start + (duration || 30);
+  // bloqueia o horário se sobrepuser qualquer marcação já existente nesse dia,
+  // tendo em conta a duração do serviço que se está a tentar marcar
+  return bookedIntervals(dateISO).some(([a, b]) => start < b && a < end);
 }
 
 /* ============================================================
@@ -761,7 +775,7 @@ function renderBookingFlow(){
     const grid = document.createElement("div");
     grid.className = "time-grid";
     slots.forEach(t=>{
-      const taken = isSlotTaken(state.date, t);
+      const taken = isSlotTaken(state.date, t, state.service.duration);
       const el = document.createElement("div");
       el.className = "time-slot" + (state.time===t?" selected":"") + (taken?" taken":"");
       el.textContent = t;
