@@ -218,6 +218,16 @@
     cursor:pointer;
   }
   .loc-opt.selected{border-color:var(--gold);background:var(--surface-2);color:var(--gold-bright);}
+  .geo-box{margin:-4px 0 12px;}
+  .geo-btn{padding:12px 0;font-size:13px;}
+  .geo-status{
+    font-size:11.5px;
+    color:var(--muted);
+    line-height:1.4;
+    margin-top:8px;
+    padding:0 2px;
+  }
+  .geo-status a{color:var(--gold-bright);}
   /* form */
   .field{margin-bottom:12px;}
   .field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px;}
@@ -463,7 +473,8 @@ const CONFIG = {
     5: [[9*60, 11*60+30], [16*60+30, 19*60]],         // Sexta
     6: [[11*60+30, 18*60]],                           // Sábado: 11h30–18h
   },
-  slotStepMinutes: 30,
+  slotStepMinutes: 15,
+  bufferMinutes: 30, // intervalo obrigatório depois de cada marcação (limpeza/preparação)
   daysAhead: 14,
   studioPin: "2846", // código de acesso ao Studio e aos Ganhos — muda aqui quando quiseres
 };
@@ -495,6 +506,8 @@ let state = {
   notes: "",
   atHome: false,
   address: "",
+  lat: null,
+  lng: null,
   justConfirmed: null,
   unlockedFallback: false,
 };
@@ -548,7 +561,8 @@ function bookedIntervals(dateISO){
     .map(b => {
       const [h, m] = b.time.split(":").map(Number);
       const start = h * 60 + m;
-      return [start, start + (b.duration || 30)];
+      // soma a duração do serviço + o intervalo obrigatório a seguir (CONFIG.bufferMinutes)
+      return [start, start + (b.duration || 30) + CONFIG.bufferMinutes];
     });
 }
 function isSlotTaken(dateISO, time, duration){
@@ -800,7 +814,7 @@ function renderBookingFlow(){
 
   function bookingValid(){
     const nameOk = state.name.trim().length > 1;
-    const addressOk = !state.atHome || state.address.trim().length > 3;
+    const addressOk = !state.atHome || state.address.trim().length > 3 || (state.lat != null && state.lng != null);
     return nameOk && addressOk;
   }
   function refreshConfirmState(){
@@ -832,6 +846,65 @@ function renderBookingFlow(){
       state.address = v;
       refreshConfirmState();
     }, "Rua, número, localidade"));
+
+    // localização exata por GPS (opcional, mais preciso do que a morada escrita)
+    const geoWrap = document.createElement("div");
+    geoWrap.className = "geo-box";
+    const geoBtn = document.createElement("button");
+    geoBtn.type = "button";
+    geoBtn.className = "btn secondary geo-btn";
+    const geoStatus = document.createElement("div");
+    geoStatus.className = "geo-status";
+
+    function renderGeoState(){
+      if(state.lat != null && state.lng != null){
+        geoBtn.textContent = "📍 Localização exata capturada ✓";
+        geoBtn.disabled = true;
+        geoStatus.innerHTML = `O pin no Maps vai cair exatamente onde estavas ao marcar. <a href="#" class="geo-remove">Remover</a>`;
+        const rm = geoStatus.querySelector(".geo-remove");
+        rm.addEventListener("click", (e)=>{
+          e.preventDefault();
+          state.lat = null;
+          state.lng = null;
+          geoBtn.disabled = false;
+          renderGeoState();
+          refreshConfirmState();
+        });
+      } else {
+        geoBtn.textContent = "📍 Usar a minha localização atual";
+        geoBtn.disabled = false;
+        geoStatus.textContent = "";
+      }
+    }
+    renderGeoState();
+
+    geoBtn.addEventListener("click", ()=>{
+      if(!navigator.geolocation){
+        geoStatus.textContent = "Este telemóvel/navegador não permite partilhar localização — escreve a morada acima.";
+        return;
+      }
+      geoBtn.disabled = true;
+      geoBtn.textContent = "A localizar…";
+      geoStatus.textContent = "";
+      navigator.geolocation.getCurrentPosition(
+        (pos)=>{
+          state.lat = pos.coords.latitude;
+          state.lng = pos.coords.longitude;
+          renderGeoState();
+          refreshConfirmState();
+        },
+        ()=>{
+          geoBtn.disabled = false;
+          geoBtn.textContent = "📍 Usar a minha localização atual";
+          geoStatus.textContent = "Não foi possível obter a localização (permissão negada ou indisponível). Escreve a morada acima.";
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    });
+
+    geoWrap.appendChild(geoBtn);
+    geoWrap.appendChild(geoStatus);
+    form.appendChild(geoWrap);
   }
 
   form.appendChild(fieldInput("Nome", "text", state.name, v=>{
@@ -915,6 +988,8 @@ function confirmBooking(){
     notes: state.notes.trim(),
     atHome: state.atHome,
     address: state.atHome ? state.address.trim() : "",
+    lat: state.atHome ? state.lat : null,
+    lng: state.atHome ? state.lng : null,
     status: "confirmado",
     createdAt: Date.now(),
   };
@@ -933,8 +1008,12 @@ function calendarDates(b){
   const f = d => d.getFullYear()+pad2(d.getMonth()+1)+pad2(d.getDate())+"T"+pad2(d.getHours())+pad2(d.getMinutes())+"00";
   return f(start)+"/"+f(end);
 }
-function googleMapsDirectionsLink(address){
-  return "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(address);
+function locationQuery(b){
+  if(b.lat != null && b.lng != null) return `${b.lat},${b.lng}`;
+  return b.address || "";
+}
+function googleMapsDirectionsLink(b){
+  return "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(locationQuery(b));
 }
 function googleCalendarLink(b){
   const params = new URLSearchParams({
@@ -944,6 +1023,7 @@ function googleCalendarLink(b){
     details: `Marcação em ${CONFIG.brandName} ${CONFIG.brandSuffix}. Cliente: ${b.name} · Tel: ${b.phone}${b.notes ? " · Notas: " + b.notes : ""}`,
   });
   if(b.atHome && b.address) params.set("location", b.address);
+  else if(b.atHome && b.lat != null) params.set("location", `${b.lat},${b.lng}`);
   return "https://calendar.google.com/calendar/render?" + params.toString();
 }
 
@@ -1019,21 +1099,21 @@ function renderConfirmation(b){
     <div class="confirm-row"><span>Dia</span><span>${DOW[dateObj.getDay()]}, ${dateObj.getDate()} ${MONTHS[dateObj.getMonth()]}</span></div>
     <div class="confirm-row"><span>Hora</span><span>${b.time}</span></div>
     <div class="confirm-row"><span>Local</span><span>${b.atHome ? "Ao domicílio" : "Na barbearia"}</span></div>
-    ${b.atHome ? `<div class="confirm-row"><span>Morada</span><span>${b.address}</span></div>` : ""}
+    ${b.atHome ? `<div class="confirm-row"><span>Morada</span><span>${b.address || (b.lat != null ? "Localização precisa (GPS)" : "—")}</span></div>` : ""}
     <div class="confirm-row"><span>Duração</span><span>${b.duration} min</span></div>
     <div class="confirm-row"><span>Preço</span><span>${b.price}</span></div>
     ${b.phone ? `<div class="confirm-row"><span>Telemóvel</span><span>${b.phone}</span></div>` : ""}
   `;
   wrap.appendChild(card);
 
-  if(b.atHome && b.address){
+  if(b.atHome && (b.address || b.lat != null)){
     const maps = document.createElement("a");
     maps.className = "btn secondary";
     maps.style.marginTop = "14px";
     maps.style.display = "block";
     maps.style.textAlign = "center";
     maps.style.textDecoration = "none";
-    maps.href = googleMapsDirectionsLink(b.address);
+    maps.href = googleMapsDirectionsLink(b);
     maps.target = "_blank";
     maps.rel = "noopener";
     maps.textContent = "Ver morada no Google Maps";
@@ -1057,7 +1137,7 @@ function renderConfirmation(b){
   again.style.marginTop = "14px";
   again.textContent = "Fazer outra marcação";
   again.addEventListener("click", ()=>{
-    state = {...state, step:1, service:null, date:null, time:null, name:"", phone:"", notes:"", atHome:false, address:"", justConfirmed:null};
+    state = {...state, step:1, service:null, date:null, time:null, name:"", phone:"", notes:"", atHome:false, address:"", lat:null, lng:null, justConfirmed:null};
     render();
   });
   wrap.appendChild(again);
@@ -1099,8 +1179,8 @@ function renderStudio(){
       ${b.atHome ? `
         <div class="booking-home">🏠 Ao domicílio</div>
         <div class="booking-address">
-          <span>${b.address}</span>
-          <a class="maps-link" href="${googleMapsDirectionsLink(b.address)}" target="_blank" rel="noopener">Abrir no Maps →</a>
+          <span>${b.address || (b.lat != null ? "Localização precisa (GPS)" : "")}</span>
+          <a class="maps-link" href="${googleMapsDirectionsLink(b)}" target="_blank" rel="noopener">Abrir no Maps →</a>
         </div>
       ` : ""}
       <div class="booking-client">${b.name}</div>
